@@ -1,7 +1,7 @@
-package service;
+package pl.edu.agh.tip.netprobe.service;
 
-import runnables.UDPPingResponder;
-import runnables.UDPPingSender;
+import pl.edu.agh.tip.netprobe.runnables.UDPPingResponder;
+import pl.edu.agh.tip.netprobe.runnables.UDPPingSender;
 
 import java.net.InetAddress;
 import java.net.SocketException;

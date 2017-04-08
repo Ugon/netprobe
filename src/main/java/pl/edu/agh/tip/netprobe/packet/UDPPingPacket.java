@@ -1,4 +1,4 @@
-package packet;
+package pl.edu.agh.tip.netprobe.packet;
 
 import java.util.UUID;
 

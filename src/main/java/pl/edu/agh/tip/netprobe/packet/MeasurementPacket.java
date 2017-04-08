@@ -1,4 +1,4 @@
-package packet;
+package pl.edu.agh.tip.netprobe.packet;
 
 import java.nio.ByteBuffer;
 import java.util.UUID;

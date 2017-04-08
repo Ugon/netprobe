@@ -1,6 +1,6 @@
-package runnables;
+package pl.edu.agh.tip.netprobe.runnables;
 
-import packet.UDPPingPacket;
+import pl.edu.agh.tip.netprobe.packet.UDPPingPacket;
 
 import java.io.IOException;
 import java.net.DatagramPacket;

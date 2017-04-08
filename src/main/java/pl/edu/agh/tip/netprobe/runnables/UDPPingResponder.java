@@ -1,7 +1,7 @@
-package runnables;
+package pl.edu.agh.tip.netprobe.runnables;
 
-import packet.MeasurementPacket;
-import packet.UDPPingPacket;
+import pl.edu.agh.tip.netprobe.packet.MeasurementPacket;
+import pl.edu.agh.tip.netprobe.packet.UDPPingPacket;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -33,7 +33,7 @@ public class UDPPingResponder implements Runnable {
                 int senderPort = receivePacket.getPort();
 
                 //todo: remove or log
-                System.out.println(System.currentTimeMillis() + " deflecting packet: " + request.getSampleId());
+                System.out.println(System.currentTimeMillis() + " deflecting pl.edu.agh.tip.netprobe.packet: " + request.getSampleId());
 
                 DatagramPacket sendPacket = new DatagramPacket(request.toResponse().asBytes(), MeasurementPacket.SIZE, senderAddress, senderPort);
                 udpSocket.send(sendPacket);
