@@ -37,15 +37,15 @@ class SniffingRegistry(object):
         del self.responders[id]
         self.lock.release()
 
-    def is_packet_of_interest(self, packet):
+    def get_worker_for_packet(self, packet):
         for key, value in self.senders.iteritems():
             if value.proto in packet:
                 if IP in packet and packet[IP].src == value.self_host and packet[IP].sport == value.self_port:
-                    return True
+                    return value
 
         for key, value in self.responders.iteritems():
             if value.proto in packet:
                 if IP in packet and packet[IP].dst == value.self_host and packet[IP].dport == value.self_port:
-                    return True
+                    return value
 
-        return False
+        return None

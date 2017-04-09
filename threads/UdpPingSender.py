@@ -3,6 +3,7 @@ import time
 from scapy.all import *
 from packet.MeasurementPacket import MeasurementPacket
 from uuid import *
+import sys
 
 class UdpPingSender(object):
 
@@ -24,11 +25,16 @@ class UdpPingSender(object):
         while True:
             try:
                 measurement_packet = MeasurementPacket(False, uuid4(), uuid4())
-                print "sending: ", measurement_packet.isResponse, measurement_packet.measurement_id, measurement_packet.sample_id
+                # print "sending: ", measurement_packet.isResponse, measurement_packet.measurement_id, measurement_packet.sample_id
                 self.socket.sendto(measurement_packet.to_binary(), (self.target_host, self.target_port))
                 time.sleep(self.message_interval)
             except:
                 print "thats not gone well"
+
+    def persist(self, packet):
+        measurement_packet = MeasurementPacket.from_binary(packet[UDP].payload.load)
+        print "SENDER:    ", measurement_packet.sample_id
+        sys.stdout.flush()
 
 
 

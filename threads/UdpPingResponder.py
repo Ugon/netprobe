@@ -1,6 +1,7 @@
 import socket
 from scapy.all import *
 from packet.MeasurementPacket import MeasurementPacket
+import sys
 
 
 class UdpPingResponder(object):
@@ -19,5 +20,10 @@ class UdpPingResponder(object):
         while True:
             data, addr = self.socket.recvfrom(64 * 1024)
             measurement_packet = MeasurementPacket.from_binary(data)
-            print "responder got: ", measurement_packet.isResponse, measurement_packet.measurement_id, measurement_packet.sample_id
+            # print "responder got: ", measurement_packet.isResponse, measurement_packet.measurement_id, measurement_packet.sample_id
             self.socket.sendto(data, addr)
+
+    def persist(self, packet):
+        measurement_packet = MeasurementPacket.from_binary(packet[UDP].payload.load)
+        print "RESPONDER: ", measurement_packet.sample_id
+        sys.stdout.flush()
