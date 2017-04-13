@@ -10,7 +10,7 @@ class Sniffer(object):
     def on_packet(self, packet):
         worker = self.sniffing_registry.get_worker_for_packet(packet)
         if worker is not None:
-            worker.persist(packet)
+            worker.persist_packet(packet)
 
     def run(self):
         #lfilter
