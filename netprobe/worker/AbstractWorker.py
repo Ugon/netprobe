@@ -1,5 +1,5 @@
-from threading import Thread, Event
 from abc import ABCMeta, abstractmethod
+from threading import Thread, Event
 
 
 class AbstractWorker(object):

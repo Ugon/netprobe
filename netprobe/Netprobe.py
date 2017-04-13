@@ -1,7 +1,9 @@
 import json
+import sys
 import traceback
 from uuid import UUID
 
+import netifaces as ni
 from flask import Flask, request
 from pymongo import MongoClient
 
@@ -9,8 +11,6 @@ from dao.MongoDao import MongoDao
 from service.MeasurementService import MeasurementService
 from service.Sniffer import Sniffer
 from service.SniffingRegistry import SniffingRegistry
-import netifaces as ni
-import sys
 
 interface = sys.argv[1]
 

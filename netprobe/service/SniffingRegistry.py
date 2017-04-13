@@ -1,5 +1,4 @@
 from threading import Lock
-from scapy.all import *
 
 
 class SniffingRegistry(object):

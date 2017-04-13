@@ -1,4 +1,4 @@
-from worker.UdpPingSender import UdpPingSender
+from netprobe.worker.UdpPingSender import UdpPingSender
 from worker.UdpPingResponder import UdpPingResponder
 
 
@@ -11,7 +11,8 @@ class MeasurementService(object):
         self.udp_responder_dao = udp_responder_dao
 
     def start_udp_sender(self, self_port, target_address, target_port, interval_ms, measurement_id):
-        sender = UdpPingSender(self.self_address, self_port, target_address, target_port, interval_ms, measurement_id, self.udp_sender_dao)
+        sender = UdpPingSender(self.self_address, self_port, target_address, target_port, interval_ms, measurement_id,
+                               self.udp_sender_dao)
         self.sniffing_registry.register_sender(measurement_id, sender)
         return sender.async_start()
 

@@ -1,9 +1,8 @@
-import sys
 from scapy.all import *
 from threading import Event
 from uuid import *
 
-from packet.MeasurementPacket import MeasurementPacket
+from netprobe.packet.MeasurementPacket import MeasurementPacket
 from worker.AbstractWorker import AbstractWorker
 
 

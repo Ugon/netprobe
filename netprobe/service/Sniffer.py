@@ -7,7 +7,7 @@ class Sniffer(object):
         self.sniffing_registry = sniffing_registry
         self.interface = interface
 
-        self.thread=None
+        self.thread = None
 
     def on_packet(self, packet):
         worker = self.sniffing_registry.get_worker_for_packet(packet)

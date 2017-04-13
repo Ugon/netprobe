@@ -1,6 +1,3 @@
-import pymongo
-
-
 class MongoDao(object):
     def __init__(self, client, db_name, collection_name):
         self.client = client
@@ -23,4 +20,3 @@ class MongoDao(object):
             obj['sample_id'] = str(obj['sample_id'])
 
         return result
-

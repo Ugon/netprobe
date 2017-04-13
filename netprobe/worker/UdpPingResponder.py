@@ -1,13 +1,11 @@
-import socket
-from scapy.all import *
-from packet.MeasurementPacket import MeasurementPacket
-from worker.AbstractWorker import AbstractWorker
 import select
-import sys
+from scapy.all import *
+
+from netprobe.packet.MeasurementPacket import MeasurementPacket
+from worker.AbstractWorker import AbstractWorker
 
 
 class UdpPingResponder(AbstractWorker):
-
     def __init__(self, self_host, self_port, measurement_id, dao):
         super(UdpPingResponder, self).__init__()
         self.dao = dao
