@@ -8,7 +8,7 @@ RUN pip install --upgrade pip
 RUN pip install scapy netifaces flask pymongo bitstring
 
 RUN mkdir -p /data/db
-ADD netprobe /opt
+COPY netprobe /opt/netprobe
 
 ENV NET_INTERFACE eth0
 CMD sh -c "(mongod --port 50000 &) && (sleep 1 ; python /opt/netprobe/Netprobe.py $NET_INTERFACE)"

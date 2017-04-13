@@ -1,4 +1,4 @@
-from netprobe.worker.UdpPingSender import UdpPingSender
+from worker.UdpPingSender import UdpPingSender
 from worker.UdpPingResponder import UdpPingResponder
 
 

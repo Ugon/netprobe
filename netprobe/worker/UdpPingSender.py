@@ -2,7 +2,7 @@ from scapy.all import *
 from threading import Event
 from uuid import *
 
-from netprobe.packet.MeasurementPacket import MeasurementPacket
+from packet.MeasurementPacket import MeasurementPacket
 from worker.AbstractWorker import AbstractWorker
 
 
