@@ -3,12 +3,15 @@ from worker.UdpPingResponder import UdpPingResponder
 
 
 class MeasurementService(object):
-    def __init__(self, self_address, sniffing_registry):
+    def __init__(self, self_address, sniffing_registry, udp_sender_dao, udp_responder_dao):
         self.self_address = self_address
         self.sniffing_registry = sniffing_registry
 
+        self.udp_sender_dao = udp_sender_dao
+        self.udp_responder_dao = udp_responder_dao
+
     def start_udp_sender(self, self_port, target_address, target_port, interval_ms, measurement_id):
-        sender = UdpPingSender(self.self_address, self_port, target_address, target_port, interval_ms, measurement_id)
+        sender = UdpPingSender(self.self_address, self_port, target_address, target_port, interval_ms, measurement_id, self.udp_sender_dao)
         self.sniffing_registry.register_sender(measurement_id, sender)
         return sender.async_start()
 
@@ -22,7 +25,7 @@ class MeasurementService(object):
             return False
 
     def start_udp_responder(self, self_port, measurement_id):
-        responder = UdpPingResponder(self.self_address, self_port, measurement_id)
+        responder = UdpPingResponder(self.self_address, self_port, measurement_id, self.udp_responder_dao)
         self.sniffing_registry.register_responder(measurement_id, responder)
         return responder.async_start()
 

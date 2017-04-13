@@ -8,8 +8,9 @@ import sys
 
 class UdpPingResponder(AbstractWorker):
 
-    def __init__(self, self_host, self_port, measurement_id):
+    def __init__(self, self_host, self_port, measurement_id, dao):
         super(UdpPingResponder, self).__init__()
+        self.dao = dao
         self.measurement_id = measurement_id
 
         self.self_host = self_host
@@ -30,5 +31,6 @@ class UdpPingResponder(AbstractWorker):
 
     def persist_packet(self, packet):
         measurement_packet = MeasurementPacket.from_binary(packet[UDP].payload.load)
-        print "RESPONDER: ", measurement_packet.sample_id
+        self.dao.insert(measurement_packet.measurement_id, measurement_packet.sample_id, int(packet.time * 1000))
+        print "RESPONDER: ", measurement_packet.sample_id, int(packet.time * 1000)
         sys.stdout.flush()
