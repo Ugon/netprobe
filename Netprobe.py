@@ -1,23 +1,32 @@
+import json
+import traceback
+from uuid import UUID
+
 from flask import Flask, request
-from service.SniffingRegistry import SniffingRegistry
+from pymongo import MongoClient
+
+from dao.MongoDao import MongoDao
 from service.MeasurementService import MeasurementService
 from service.Sniffer import Sniffer
-import traceback
-from pymongo import MongoClient
-from dao.MongoDao import MongoDao
-from uuid import UUID
-import json
+from service.SniffingRegistry import SniffingRegistry
+import netifaces as ni
+import sys
+
+interface = sys.argv[1]
+
+self_ip = ni.ifaddresses(interface)[2][0]['addr']
+print self_ip
+
 app = Flask(__name__)
 
-mongo_client = MongoClient()
+mongo_client = MongoClient(host=self_ip, port=50000)
 udp_sender_dao = MongoDao(mongo_client, 'Netprobe', 'UdpSender')
 udp_responder_dao = MongoDao(mongo_client, 'Netprobe', 'UdpResponder')
 
-
 sniffing_registry = SniffingRegistry()
-service = MeasurementService("127.0.0.1", sniffing_registry, udp_sender_dao, udp_responder_dao)
+service = MeasurementService(self_ip, sniffing_registry, udp_sender_dao, udp_responder_dao)
 
-sniffer = Sniffer(sniffing_registry, "lo")
+sniffer = Sniffer(sniffing_registry, interface)
 sniffer.async_start()
 
 
@@ -36,7 +45,7 @@ def start_udp_sender(measurement_uuid):
     try:
         measurement_id = UUID(measurement_uuid)
 
-        #QUERY PARAMS:
+        # QUERY PARAMS:
         self_port = int(request.args.get('self_port'))
         target_address = request.args.get('target_address')
         target_port = int(request.args.get('target_port'))
@@ -73,7 +82,7 @@ def start_udp_responder(measurement_uuid):
     try:
         measurement_id = UUID(measurement_uuid)
 
-        #QUERY PARAMS:
+        # QUERY PARAMS:
         self_port = int(request.args.get('self_port'))
 
         service.start_udp_responder(self_port, measurement_id)
@@ -91,4 +100,5 @@ def stop_udp_responder(measurement_uuid):
     except:
         return traceback.format_exc(), 400
 
-app.run()
+
+app.run(self_ip, 5000)
