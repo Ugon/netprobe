@@ -39,7 +39,6 @@ def get_udp_sender_results(measurement_uuid):
     except:
         return traceback.format_exc(), 400
 
-
 @app.route('/measurement/udp/sender/<measurement_uuid>', methods=['POST'])
 def start_udp_sender(measurement_uuid):
     try:

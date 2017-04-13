@@ -5,7 +5,7 @@ RUN echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiver
 
 RUN apt-get update -y && apt-get install -y python-pip mongodb-org net-tools
 RUN pip install --upgrade pip
-RUN pip install scapy netifaces flask pymongo bitstring
+RUN pip install scapy==2.2.0-dev netifaces flask pymongo bitstring
 
 RUN mkdir -p /data/db
 COPY netprobe /opt/netprobe
