@@ -71,10 +71,10 @@ class SniffingRegistry(object):
         self.lock.release()
 
     def get_worker_for_packet(self, packet):
-        # for key, value in self.senders.iteritems():
-        #     if value.proto in packet:
-        #         if IP in packet and packet[IP].src == value.self_host and packet[IP].sport == value.self_port:
-        #             return value
+        for key, value in self.senders.iteritems():
+            if value.proto in packet:
+                if IP in packet and packet[IP].src == value.self_host and packet[IP].sport == value.self_port:
+                    return value
 
         for key, value in self.responders.iteritems():
             if value.proto in packet:

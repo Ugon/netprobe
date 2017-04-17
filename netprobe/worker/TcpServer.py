@@ -25,7 +25,7 @@ class TcpServer(AbstractWorker):
         self.measurement_packet = None
 
     def loop_iteration(self):
-        ready = select([self.socket], [], [], 1)
+        ready = select.select([self.socket], [], [], 1)
         if ready[0]:
             client_socket, client_address = self.socket.accept()
             data = client_socket.recv(64 * 1024)

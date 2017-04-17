@@ -26,12 +26,11 @@ class TcpClient(AbstractWorker):
         s.connect((self.target_host, self.target_port))
         s.send(MeasurementPacket(False, self.measurement_id, uuid4()).to_binary())
         s.shutdown(socket.SHUT_WR)
-        # s.recv(64 * 1024)
         s.close()
         time.sleep(self.message_interval)
 
     def persist_packet(self, packet):
         if packet[TCP].flags == 2:
-            self.dao.insert(self.measurement_id, packet[TCP].seq, int(packet.time * 1000))
-            print "CLIENT:    ", packet[TCP].seq, int(packet.time * 1000)
+            self.dao.insert(self.measurement_id, packet[TCP].seq + 1, int(packet.time * 1000))
+            print "CLIENT:    ", packet[TCP].seq + 1, int(packet.time * 1000)
             sys.stdout.flush()
