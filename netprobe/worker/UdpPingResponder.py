@@ -20,7 +20,7 @@ class UdpPingResponder(AbstractWorker):
         self.socket.bind((self_host, self_port))
 
     def loop_iteration(self):
-        ready = select.select([self.socket], [], [], 1)
+        ready = select([self.socket], [], [], 1)
         if ready[0]:
             data, addr = self.socket.recvfrom(64 * 1024)
             # measurement_packet = MeasurementPacket.from_binary(data)

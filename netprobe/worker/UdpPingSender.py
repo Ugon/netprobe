@@ -23,14 +23,12 @@ class UdpPingSender(AbstractWorker):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind((self_host, self_port))
 
-        self.thread = None
-        self._stop = Event()
-
     def loop_iteration(self):
         try:
             measurement_packet = MeasurementPacket(False, self.measurement_id, uuid4())
             # print "sending: ", measurement_packet.isResponse, measurement_packet.measurement_id, measurement_packet.sample_id
             self.socket.sendto(measurement_packet.to_binary(), (self.target_host, self.target_port))
+            # self.socket.recv(10000)
             time.sleep(self.message_interval)
         except:
             print "thats not gone well"

@@ -13,6 +13,9 @@ class SniffingRegistry(object):
         self.responders = {}
         self.responders_self_ports = []
 
+        self.receivers = {}
+        self.receivers_self_ports = []
+
     def register_sender(self, measurement_id, sender):
         self.lock.acquire()
         self.senders[measurement_id] = sender
@@ -49,13 +52,36 @@ class SniffingRegistry(object):
         del self.responders[measurement_id]
         self.lock.release()
 
+    def register_receiver(self, measurement_id, receiver):
+        self.lock.acquire()
+        self.receivers[measurement_id] = receiver
+        self.receivers_self_ports.append(receiver.self_port)
+        self.lock.release()
+
+    def get_receiver(self, measurement_id):
+        self.lock.acquire()
+        receiver = self.receivers[measurement_id]
+        self.lock.release()
+        return receiver
+
+    def remove_receiver(self, measurement_id):
+        self.lock.acquire()
+        self.receivers_self_ports.remove(self.receivers[measurement_id].self_port)
+        del self.receivers[measurement_id]
+        self.lock.release()
+
     def get_worker_for_packet(self, packet):
-        for key, value in self.senders.iteritems():
-            if value.proto in packet:
-                if IP in packet and packet[IP].src == value.self_host and packet[IP].sport == value.self_port:
-                    return value
+        # for key, value in self.senders.iteritems():
+        #     if value.proto in packet:
+        #         if IP in packet and packet[IP].src == value.self_host and packet[IP].sport == value.self_port:
+        #             return value
 
         for key, value in self.responders.iteritems():
+            if value.proto in packet:
+                if IP in packet and packet[IP].dst == value.self_host and packet[IP].dport == value.self_port:
+                    return value
+
+        for key, value in self.receivers.iteritems():
             if value.proto in packet:
                 if IP in packet and packet[IP].dst == value.self_host and packet[IP].dport == value.self_port:
                     return value
