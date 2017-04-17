@@ -31,7 +31,4 @@ class AbstractWorker(object):
             self.thread.start()
 
     def stop(self):
-        if self.thread is None:
-            raise Exception("cant stop what is stopped")
-        else:
-            self._stop.set()
+        self._stop.set()
