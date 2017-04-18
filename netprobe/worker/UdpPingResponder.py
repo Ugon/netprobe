@@ -16,6 +16,7 @@ class UdpPingResponder(AbstractWorker):
         self.proto = UDP
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.setblocking(0)
         self.socket.bind((self_host, self_port))
 

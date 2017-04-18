@@ -23,7 +23,7 @@ class MeasurementService(object):
         receiver = UdpPingReceiver(self.self_address, self_port, sender.socket, measurement_id, self.udp_receiver_dao)
         self.sniffing_registry.register_sender(measurement_id, sender)
         self.sniffing_registry.register_receiver(measurement_id, receiver)
-        return sender.async_start() and receiver.async_start
+        return sender.async_start() and receiver.async_start()
 
     def stop_udp_sender_and_receiver(self, measurement_id):
         sender = self.sniffing_registry.get_sender(measurement_id)

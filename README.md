@@ -42,9 +42,11 @@ sudo docker run --network="host" -e NET_INTERFACE=<your_interface> netprobe
 
 3) zebranie wyników z hosta docelowego
 `GET 192.168.0.15:5000/measurement/tcp/server/505e0c51-3ece-4ddf-93ec-e164ae346e47`
+`[{"timestamp": 1492545246466, "sample_id": "3776104276"}]`
 
 4) zebranie wyników z hosta źródłowego
 `GET 192.168.0.2:5000/measurement/tcp/client/505e0c51-3ece-4ddf-93ec-e164ae346e47`
+`[{"timestamp": 1492545246366, "sample_id": "3776104276"}]`
 
 5) zakończenie pomiarów na hoście źródłowym
 `DELETE 192.168.0.2:5000/measurement/tcp/client/505e0c51-3ece-4ddf-93ec-e164ae346e47`

@@ -21,6 +21,7 @@ class UdpPingSender(AbstractWorker):
         self.message_interval = message_interval
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.bind((self_host, self_port))
 
     def loop_iteration(self):
