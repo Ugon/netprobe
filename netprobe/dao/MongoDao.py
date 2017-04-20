@@ -20,3 +20,10 @@ class MongoDao(object):
             obj['sample_id'] = str(obj['sample_id'])
 
         return result
+
+    def get_all_icmp(self, measurement_id):
+        result = list(self.collection.find(
+            {'measurement_id': measurement_id},
+            {'sample_id': 1, 'timestamp': 1, '_id': 0}))
+
+        return result

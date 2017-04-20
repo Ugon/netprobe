@@ -1,9 +1,9 @@
 import json
+import netifaces as ni
 import sys
 import traceback
 from uuid import UUID
 
-import netifaces as ni
 from flask import Flask, request
 from pymongo import MongoClient
 
@@ -19,20 +19,24 @@ print self_ip
 
 app = Flask(__name__)
 
-mongo_client = MongoClient(host=self_ip, port=50000)
-# mongo_client = MongoClient()
+# mongo_client = MongoClient(host=self_ip, port=50000)
+mongo_client = MongoClient()
 udp_sender_dao = MongoDao(mongo_client, 'Netprobe', 'UdpSender')
 udp_responder_dao = MongoDao(mongo_client, 'Netprobe', 'UdpResponder')
 udp_receiver_dao = MongoDao(mongo_client, 'Netprobe', 'UdpReceiver')
 tcp_server_dao = MongoDao(mongo_client, 'Netprobe', 'TcpServer')
 tcp_client_dao = MongoDao(mongo_client, 'Netprobe', 'TcpClient')
+icmp_sender_dao = MongoDao(mongo_client, 'Netprobe', 'IcmpSender')
+icmp_receiver_dao = MongoDao(mongo_client, 'Netprobe', 'IcmpReceiver')
 
 sniffing_registry = SniffingRegistry()
 service = MeasurementService(self_ip, sniffing_registry, udp_sender_dao, udp_responder_dao, udp_receiver_dao,
-                             tcp_server_dao, tcp_client_dao)
+                             tcp_server_dao, tcp_client_dao, icmp_sender_dao, icmp_receiver_dao)
 
 sniffer = Sniffer(sniffing_registry, interface)
 sniffer.async_start()
+
+service.start_icmp_receiver()
 
 
 @app.route('/measurement/udp/sender/<measurement_uuid>', methods=['GET'])
@@ -44,6 +48,7 @@ def get_udp_sender_results(measurement_uuid):
     except:
         return traceback.format_exc(), 400
 
+
 @app.route('/measurement/udp/sender/<measurement_uuid>', methods=['POST'])
 def start_udp_sender(measurement_uuid):
     try:
@@ -53,9 +58,9 @@ def start_udp_sender(measurement_uuid):
         self_port = int(request.args.get('self_port'))
         target_address = request.args.get('target_address')
         target_port = int(request.args.get('target_port'))
-        interval_ms = int(request.args.get('interval_ms'))
+        interval_s = int(request.args.get('interval_s'))
 
-        service.start_udp_sender_and_receiver(self_port, target_address, target_port, interval_ms, measurement_id)
+        service.start_udp_sender_and_receiver(self_port, target_address, target_port, interval_s, measurement_id)
         return "ok", 200
     except:
         return traceback.format_exc(), 400
@@ -69,6 +74,7 @@ def stop_udp_sender(measurement_uuid):
         return "ok", 200
     except:
         return traceback.format_exc(), 400
+
 
 #########################################################################################
 
@@ -105,6 +111,7 @@ def stop_udp_responder(measurement_uuid):
     except:
         return traceback.format_exc(), 400
 
+
 #########################################################################################
 
 @app.route('/measurement/tcp/client/<measurement_uuid>', methods=['GET'])
@@ -126,9 +133,9 @@ def start_tcp_client(measurement_uuid):
         self_port = int(request.args.get('self_port'))
         target_address = request.args.get('target_address')
         target_port = int(request.args.get('target_port'))
-        interval_ms = int(request.args.get('interval_ms'))
+        interval_s = int(request.args.get('interval_s'))
 
-        service.start_tcp_client(self_port, target_address, target_port, interval_ms, measurement_id)
+        service.start_tcp_client(self_port, target_address, target_port, interval_s, measurement_id)
         return "ok", 200
     except:
         return traceback.format_exc(), 400
@@ -179,6 +186,56 @@ def stop_tcp_server(measurement_uuid):
     except:
         return traceback.format_exc(), 400
 
+
 #########################################################################################
+
+@app.route('/measurement/icmp/sender/<measurement_short_id>', methods=['GET'])
+def get_icmp_sender_results(measurement_short_id):
+    try:
+        measurement_id = int(measurement_short_id)
+        result = icmp_sender_dao.get_all_icmp(measurement_id)
+        return json.dumps(result), 200
+    except:
+        return traceback.format_exc(), 400
+
+
+@app.route('/measurement/icmp/sender/<measurement_short_id>', methods=['POST'])
+def start_icmp_sender(measurement_short_id):
+    try:
+        measurement_id = int(measurement_short_id)
+        if measurement_id > 30000:
+            raise ValueError
+
+        # QUERY PARAMS:
+        target_address = request.args.get('target_address')
+        interval_s = int(request.args.get('interval_s'))
+
+        service.start_icmp_sender(target_address, interval_s, measurement_id)
+        return "ok", 200
+    except:
+        return traceback.format_exc(), 400
+
+
+@app.route('/measurement/icmp/sender/<measurement_short_id>', methods=['DELETE'])
+def stop_icmp_sender(measurement_short_id):
+    try:
+        measurement_id = int(measurement_short_id)
+        service.stop_icmp_sender(measurement_id)
+        return "ok", 200
+    except:
+        return traceback.format_exc(), 400
+
+
+#########################################################################################
+
+@app.route('/measurement/icmp/receiver/<measurement_short_id>', methods=['GET'])
+def get_icmp_receiver_results(measurement_short_id):
+    try:
+        measurement_id = int(measurement_short_id)
+        result = icmp_receiver_dao.get_all_icmp(measurement_id)
+        return json.dumps(result), 200
+    except:
+        return traceback.format_exc(), 400
+
 
 app.run(self_ip, 5000)

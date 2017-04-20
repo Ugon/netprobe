@@ -73,7 +73,10 @@ class SniffingRegistry(object):
     def get_worker_for_packet(self, packet):
         for key, value in self.senders.iteritems():
             if value.proto in packet:
-                if IP in packet and packet[IP].src == value.self_host and packet[IP].sport == value.self_port:
+                if ICMP in packet:
+                    if packet[ICMP].type == 0 and packet[ICMP].id == value.measurement_id:
+                        return value
+                elif IP in packet and packet[IP].src == value.self_host and packet[IP].sport == value.self_port:
                     return value
 
         for key, value in self.responders.iteritems():
@@ -83,7 +86,10 @@ class SniffingRegistry(object):
 
         for key, value in self.receivers.iteritems():
             if value.proto in packet:
-                if IP in packet and packet[IP].dst == value.self_host and packet[IP].dport == value.self_port:
+                if ICMP in packet:
+                    if packet[ICMP].type == 8:
+                        return value
+                elif IP in packet and packet[IP].dst == value.self_host and packet[IP].dport == value.self_port:
                     return value
 
         return None

@@ -1,3 +1,5 @@
+import traceback
+
 from abc import ABCMeta, abstractmethod
 from threading import Thread, Event
 
@@ -19,7 +21,10 @@ class AbstractWorker(object):
 
     def _run(self):
         while not self._stop.is_set():
-            self.loop_iteration()
+            try:
+                self.loop_iteration()
+            except:
+                print traceback.format_exc()
         self._stop.clear()
         self.thread = None
 
