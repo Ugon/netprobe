@@ -19,14 +19,15 @@ print self_ip
 
 app = Flask(__name__)
 
-# mongo_client = MongoClient(host=self_ip, port=50000)
-mongo_client = MongoClient()
+mongo_client = MongoClient(host=self_ip, port=50000)
+# mongo_client = MongoClient()
 udp_sender_dao = MongoDao(mongo_client, 'Netprobe', 'UdpSender')
 udp_responder_dao = MongoDao(mongo_client, 'Netprobe', 'UdpResponder')
 udp_receiver_dao = MongoDao(mongo_client, 'Netprobe', 'UdpReceiver')
 tcp_server_dao = MongoDao(mongo_client, 'Netprobe', 'TcpServer')
 tcp_client_dao = MongoDao(mongo_client, 'Netprobe', 'TcpClient')
 icmp_sender_dao = MongoDao(mongo_client, 'Netprobe', 'IcmpSender')
+icmp_responder_dao = MongoDao(mongo_client, 'Netprobe', 'IcmpResponder')
 icmp_receiver_dao = MongoDao(mongo_client, 'Netprobe', 'IcmpReceiver')
 
 sniffing_registry = SniffingRegistry()
@@ -111,6 +112,17 @@ def stop_udp_responder(measurement_uuid):
     except:
         return traceback.format_exc(), 400
 
+
+#########################################################################################
+
+@app.route('/measurement/udp/receiver/<measurement_uuid>', methods=['GET'])
+def get_udp_receiver_results(measurement_uuid):
+    try:
+        measurement_id = UUID(measurement_uuid)
+        result = udp_receiver_dao.get_all(measurement_id)
+        return json.dumps(result), 200
+    except:
+        return traceback.format_exc(), 400
 
 #########################################################################################
 
@@ -222,6 +234,18 @@ def stop_icmp_sender(measurement_short_id):
         measurement_id = int(measurement_short_id)
         service.stop_icmp_sender(measurement_id)
         return "ok", 200
+    except:
+        return traceback.format_exc(), 400
+
+
+#########################################################################################
+
+@app.route('/measurement/icmp/responder/<measurement_short_id>', methods=['GET'])
+def get_icmp_responder_results(measurement_short_id):
+    try:
+        measurement_id = int(measurement_short_id)
+        result = icmp_responder_dao.get_all_icmp(measurement_id)
+        return json.dumps(result), 200
     except:
         return traceback.format_exc(), 400
 

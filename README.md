@@ -12,7 +12,7 @@ sudo docker run --network="host" -e NET_INTERFACE=<your_interface> netprobe
 `POST 192.168.0.15:5000/measurement/udp/responder/505e0c51-3ece-4ddf-93ec-e164ae346e47?self_port=40001`
 
 2) rozpoczęcie nadawania na hoście źródłowym
-`POST 192.168.0.2:5000/measurement/udp/sender/505e0c51-3ece-4ddf-93ec-e164ae346e47?self_port=40000&target_address=192.168.0.15&target_port=40001&interval_ms=1`
+`POST 192.168.0.2:5000/measurement/udp/sender/505e0c51-3ece-4ddf-93ec-e164ae346e47?self_port=40000&target_address=192.168.0.15&target_port=40001&interval_s=1`
 
 3) zebranie wyników z hosta docelowego
 `GET 192.168.0.15:5000/measurement/udp/responder/505e0c51-3ece-4ddf-93ec-e164ae346e47`
@@ -38,7 +38,7 @@ sudo docker run --network="host" -e NET_INTERFACE=<your_interface> netprobe
 `POST 192.168.0.15:5000/measurement/tcp/server/505e0c51-3ece-4ddf-93ec-e164ae346e47?self_port=40001`
 
 2) rozpoczęcie nadawania na hoście źródłowym
-`POST 192.168.0.2:5000/measurement/tcp/client/505e0c51-3ece-4ddf-93ec-e164ae346e47?self_port=40000&target_address=192.168.0.15&target_port=40001&interval_ms=1`
+`POST 192.168.0.2:5000/measurement/tcp/client/505e0c51-3ece-4ddf-93ec-e164ae346e47?self_port=40000&target_address=192.168.0.15&target_port=40001&interval_s=1`
 
 3) zebranie wyników z hosta docelowego
 `GET 192.168.0.15:5000/measurement/tcp/server/505e0c51-3ece-4ddf-93ec-e164ae346e47`

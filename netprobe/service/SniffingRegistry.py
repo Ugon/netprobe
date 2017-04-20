@@ -74,7 +74,7 @@ class SniffingRegistry(object):
         for key, value in self.senders.iteritems():
             if value.proto in packet:
                 if ICMP in packet:
-                    if packet[ICMP].type == 0 and packet[ICMP].id == value.measurement_id:
+                    if packet[IP].src == value.self_host and packet[ICMP].type == 8 and packet[ICMP].id == value.measurement_id:
                         return value
                 elif IP in packet and packet[IP].src == value.self_host and packet[IP].sport == value.self_port:
                     return value
@@ -87,7 +87,7 @@ class SniffingRegistry(object):
         for key, value in self.receivers.iteritems():
             if value.proto in packet:
                 if ICMP in packet:
-                    if packet[ICMP].type == 8:
+                    if packet[IP].dst == value.self_host and packet[ICMP].type == value.icmp_type:
                         return value
                 elif IP in packet and packet[IP].dst == value.self_host and packet[IP].dport == value.self_port:
                     return value
