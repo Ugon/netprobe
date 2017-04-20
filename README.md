@@ -87,7 +87,7 @@ DELETE <target_ip>:5000/measurement/udp/responder/<measurement_uuid>
               
 3-way-handshake time = server time - client time
 ```
-Po nawiązaniu połączenia klient wysyła do serwera wiadomość zawierającą `measurement_id` (uuid) i zamuka połączenie. 
+Po nawiązaniu połączenia klient wysyła do serwera wiadomość zawierającą `measurement_id` (uuid) i zamyka połączenie. 
 `sample_id` pozwalającym na połączenie zmierzonych stempli czasowych w pary w tym przypadku jest `SEQ+1` (int).
 
 
