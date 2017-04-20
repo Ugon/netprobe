@@ -29,15 +29,17 @@ tcp_client_dao = MongoDao(mongo_client, 'Netprobe', 'TcpClient')
 icmp_sender_dao = MongoDao(mongo_client, 'Netprobe', 'IcmpSender')
 icmp_responder_dao = MongoDao(mongo_client, 'Netprobe', 'IcmpResponder')
 icmp_receiver_dao = MongoDao(mongo_client, 'Netprobe', 'IcmpReceiver')
+icmp_responder_dao = MongoDao(mongo_client, 'Netprobe', 'IcmpResponder')
 
 sniffing_registry = SniffingRegistry()
 service = MeasurementService(self_ip, sniffing_registry, udp_sender_dao, udp_responder_dao, udp_receiver_dao,
-                             tcp_server_dao, tcp_client_dao, icmp_sender_dao, icmp_receiver_dao)
+                             tcp_server_dao, tcp_client_dao, icmp_sender_dao, icmp_receiver_dao, icmp_responder_dao)
 
 sniffer = Sniffer(sniffing_registry, interface)
 sniffer.async_start()
 
 service.start_icmp_receiver()
+service.start_icmp_responder()
 
 
 @app.route('/measurement/udp/sender/<measurement_uuid>', methods=['GET'])
