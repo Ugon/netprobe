@@ -1,59 +1,187 @@
 # netprobe
 
+## How to run
+
 ```
 sudo docker build -t netprobe .
 sudo docker run --network="host" -e NET_INTERFACE=<your_interface> netprobe
 ```
 
 
-## pomiar UDP ping
+## Pomiar UDP ping
+```
+            source                          target 
+              |                               |
+  sender time |-------udp ping reguest------->| responder time
+              |                               |
+receiver time |<------udp ping response-------|
+              |                               |
+              
+One way delay (source -> targer) = responder time - sender time
+One way delay (target -> source) = receiver time - responder time
+Two way delay = receiver time - sender time
+```
+Pakiety `udp ping request` i `udp ping response` zawierają pola `measurement_id` (uuid) i `sample_id` (uuid), 
+dzięki którym można jednoznacznie połączyć zmierzone stemple czasowe w pary i obliczyć opóźnienia.
 
-1) rozpoczęcie nasłuchiwania na hoście docelowym
-`POST 192.168.0.15:5000/measurement/udp/responder/505e0c51-3ece-4ddf-93ec-e164ae346e47?self_port=40001`
 
-2) rozpoczęcie nadawania na hoście źródłowym
-`POST 192.168.0.2:5000/measurement/udp/sender/505e0c51-3ece-4ddf-93ec-e164ae346e47?self_port=40000&target_address=192.168.0.15&target_port=40001&interval_s=1`
+1) Rozpoczęcie nasłuchiwania na hoście docelowym
+```
+POST <target_ip>:5000/measurement/udp/responder/<measurement_uuid>
+     ?self_port=<target_port>`
+```
+2) Rozpoczęcie nadawania na hoście źródłowym
+```
+POST <source_ip>:5000/measurement/udp/sender/<measurement_uuid>
+     ?self_port=<source_port>
+     &target_address=<target_ip>
+     &target_port=<target_port>
+     &interval_s=<interval>
+```
 
-3) zebranie wyników z hosta docelowego
-`GET 192.168.0.15:5000/measurement/udp/responder/505e0c51-3ece-4ddf-93ec-e164ae346e47`
-`[{"timestamp": 1492457001178, "sample_id": "81b6ab86-eedb-4083-8523-bb1942116d6c"}]`
+3) Pobranie wyników z hosta docelowego (responder time)
+```
+GET <target_ip>:5000/measurement/udp/responder/<measurement_uuid>
 
-4) zebranie wyników z hosta źródłowego
-`GET 192.168.0.2:5000/measurement/udp/sender/505e0c51-3ece-4ddf-93ec-e164ae346e47`
-`[{"timestamp": 1492457001111, "sample_id": "81b6ab86-eedb-4083-8523-bb1942116d6c"}]`
+Example response:
+[{"timestamp": 1492457001178, "sample_id": "81b6ab86-eedb-4083-8523-bb1942116d6c"}]
+```
+
+4) Pobranie wyników z hosta źródłowego (sender time)
+```
+GET <source_ip>:5000/measurement/udp/sender/<measurement_uuid>
+
+Example response:
+[{"timestamp": 1492457001111, "sample_id": "81b6ab86-eedb-4083-8523-bb1942116d6c"}]
+```
+
+5) Pobranie wyników z hosta źródłowego (receiver time)
+```
+GET <source_ip>:5000/measurement/udp/receiver/<measurement_uuid>
+
+Example response:
+[{"timestamp": 1492457001151, "sample_id": "81b6ab86-eedb-4083-8523-bb1942116d6c"}]
+```
+
+6) zakończenie pomiarów na hoście źródłowym
+```
+DELETE <source_ip>:5000/measurement/udp/sender/<measurement_uuid>
+```
+
+7) zakończenie pomiarów na hoście docelowym
+```
+DELETE <target_ip>:5000/measurement/udp/responder/<measurement_uuid>
+```
+
+
+## Pomiar TCP 3-way-handshake
+```
+            client                          server 
+              |                               |
+  client time |-----SYN(SEQ)----------------->| 
+              |                               |
+              |<----SYN(SEQ+1); ACK(SEQ)------|
+              |                               |
+              |-----ACK(SEQ+1)--------------->| server time
+              |                               |
+              
+3-way-handshake time = server time - client time
+```
+Po nawiązaniu połączenia klient wysyła do serwera wiadomość zawierającą `measurement_id` (uuid) i zamuka połączenie. 
+`sample_id` pozwalającym na połączenie zmierzonych stempli czasowych w pary w tym przypadku jest `SEQ+1` (int).
+
+
+1) Rozpoczęcie nasłuchiwania na hoście docelowym
+```
+POST <target_ip>:5000/measurement/tcp/server/<measurement_uuid>
+     ?self_port=<target_port>`
+```
+2) Rozpoczęcie nadawania na hoście źródłowym
+```
+POST <source_ip>:5000/measurement/tcp/client/<measurement_uuid>
+     ?self_port=<source_port>
+     &target_address=<target_ip>
+     &target_port=<target_port>
+     &interval_s=<interval>
+```
+
+3) Pobranie wyników z hosta docelowego (server time)
+```
+GET <target_ip>:5000/measurement/tcp/server/<measurement_uuid>
+
+Example response:
+[{"timestamp": 1492457001178, "sample_id": 8562148}]
+```
+
+4) Pobranie wyników z hosta źródłowego (client time)
+```
+GET <source_ip>:5000/measurement/tcp/client/<measurement_uuid>
+
+Example response:
+[{"timestamp": 1492457001111, "sample_id": 8562148}]
+```
 
 5) zakończenie pomiarów na hoście źródłowym
-`DELETE 192.168.0.2:5000/measurement/udp/sender/505e0c51-3ece-4ddf-93ec-e164ae346e47`
+```
+DELETE <source_ip>:5000/measurement/tcp/client/<measurement_uuid>
+```
 
 6) zakończenie pomiarów na hoście docelowym
-`DELETE 192.168.0.15:5000/measurement/udp/responder/505e0c51-3ece-4ddf-93ec-e164ae346e47`
+```
+DELETE <target_ip>:5000/measurement/tcp/server/<measurement_uuid>
+```
 
-*) w tym przypadku sample-id to jest losowy UUID.
 
+## Pomiar ICMP ping
+```
+            source                          target 
+              |                               |
+  sender time |------icmp ping reguest------->| responder time
+              |                               |
+receiver time |<-----icmp ping response-------|
+              |                               |
+              
+One way delay (source -> targer) = responder time - sender time
+One way delay (target -> source) = receiver time - responder time
+Two way delay = receiver time - sender time
+```
+Pakiety `icmp ping request` i `icmp ping response` zawierają pola `id` (measurement_id, short) i `seq` (sample_id, short), 
+dzięki którym można jednoznacznie połączyć zmierzone stemple czasowe w pary i obliczyć opóźnienia.
 
+Hosty nie wymagają włączania nasłuchiwania - działa ono zawsze.
 
-## pomiar TCP 3-way-handshake
+1) Rozpoczęcie nadawania na hoście źródłowym
+```
+POST <source_ip>:5000/measurement/icmp/sender/<measurement_short_id>
+     ?target_address=<target_ip>
+     &interval_s=<interval>
+```
 
-1) rozpoczęcie nasłuchiwania na hoście docelowym
-`POST 192.168.0.15:5000/measurement/tcp/server/505e0c51-3ece-4ddf-93ec-e164ae346e47?self_port=40001`
+2) Pobranie wyników z hosta docelowego (responder time)
+```
+GET <target_ip>:5000/measurement/icmp/responder/<measurement_short_id>
 
-2) rozpoczęcie nadawania na hoście źródłowym
-`POST 192.168.0.2:5000/measurement/tcp/client/505e0c51-3ece-4ddf-93ec-e164ae346e47?self_port=40000&target_address=192.168.0.15&target_port=40001&interval_s=1`
+Example response:
+[{"timestamp": 1492457001178, "sample_id": 7}]
+```
 
-3) zebranie wyników z hosta docelowego
-`GET 192.168.0.15:5000/measurement/tcp/server/505e0c51-3ece-4ddf-93ec-e164ae346e47`
-`[{"timestamp": 1492545246466, "sample_id": "3776104276"}]`
+3) Pobranie wyników z hosta źródłowego (sender time)
+```
+GET <source_ip>:5000/measurement/icmp/sender/<measurement_short_id>
 
-4) zebranie wyników z hosta źródłowego
-`GET 192.168.0.2:5000/measurement/tcp/client/505e0c51-3ece-4ddf-93ec-e164ae346e47`
-`[{"timestamp": 1492545246366, "sample_id": "3776104276"}]`
+Example response:
+[{"timestamp": 1492457001111, "sample_id": 7}]
+```
+
+4) Pobranie wyników z hosta źródłowego (receiver time)
+```
+GET <source_ip>:5000/measurement/icmp/receiver/<measurement_short_id>
+
+Example response:
+[{"timestamp": 1492457001151, "sample_id": 7}]
+```
 
 5) zakończenie pomiarów na hoście źródłowym
-`DELETE 192.168.0.2:5000/measurement/tcp/client/505e0c51-3ece-4ddf-93ec-e164ae346e47`
-
-6) zakończenie pomiarów na hoście docelowym
-`DELETE 192.168.0.15:5000/measurement/tcp/server/505e0c51-3ece-4ddf-93ec-e164ae346e47`
-
-*) w tym przypadku sample-id to jest SEQ z pakietow TCP. Zazwyczaj będą unikalne, ale tak być nie musi. Najbezpieczniej matchować po sample-id ale tylko te, które sa blisko siebie w czasie (do paru sekund).
-
-<!--`sudo pip install scapy==2.2.0-dev`-->
+```
+DELETE <source_ip>:5000/measurement/icmp/sender/<measurement_short_id>
+```
