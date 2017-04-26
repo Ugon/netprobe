@@ -18,57 +18,75 @@ class SniffingRegistry(object):
 
     def register_sender(self, measurement_id, sender):
         self.lock.acquire()
-        self.senders[measurement_id] = sender
-        self.senders_self_ports.append(sender.self_port)
-        self.lock.release()
+        try:
+            self.senders[measurement_id] = sender
+            self.senders_self_ports.append(sender.self_port)
+        finally:
+            self.lock.release()
 
     def get_sender(self, measurement_id):
         self.lock.acquire()
-        sender = self.senders[measurement_id]
-        self.lock.release()
+        try:
+            sender = self.senders[measurement_id]
+        finally:
+            self.lock.release()
         return sender
 
     def remove_sender(self, measurement_id):
         self.lock.acquire()
-        self.senders_self_ports.remove(self.senders[measurement_id].self_port)
-        del self.senders[measurement_id]
-        self.lock.release()
+        try:
+            self.senders_self_ports.remove(self.senders[measurement_id].self_port)
+            del self.senders[measurement_id]
+        finally:
+            self.lock.release()
 
     def register_responder(self, measurement_id, responder):
         self.lock.acquire()
-        self.responders[measurement_id] = responder
-        self.responders_self_ports.append(responder.self_port)
-        self.lock.release()
+        try:
+            self.responders[measurement_id] = responder
+            self.responders_self_ports.append(responder.self_port)
+        finally:
+            self.lock.release()
 
     def get_responder(self, measurement_id):
         self.lock.acquire()
-        responder = self.responders[measurement_id]
-        self.lock.release()
+        try:
+            responder = self.responders[measurement_id]
+        finally:
+            self.lock.release()
         return responder
 
     def remove_responder(self, measurement_id):
         self.lock.acquire()
-        self.responders_self_ports.append(self.responders[measurement_id].self_port)
-        del self.responders[measurement_id]
-        self.lock.release()
+        try:
+            self.responders_self_ports.append(self.responders[measurement_id].self_port)
+            del self.responders[measurement_id]
+        finally:
+            self.lock.release()
 
     def register_receiver(self, measurement_id, receiver):
         self.lock.acquire()
-        self.receivers[measurement_id] = receiver
-        self.receivers_self_ports.append(receiver.self_port)
-        self.lock.release()
+        try:
+            self.receivers[measurement_id] = receiver
+            self.receivers_self_ports.append(receiver.self_port)
+        finally:
+            self.lock.release()
 
     def get_receiver(self, measurement_id):
         self.lock.acquire()
-        receiver = self.receivers[measurement_id]
-        self.lock.release()
+        try:
+            receiver = self.receivers[measurement_id]
+        finally:
+            self.lock.release()
         return receiver
 
     def remove_receiver(self, measurement_id):
         self.lock.acquire()
-        self.receivers_self_ports.remove(self.receivers[measurement_id].self_port)
-        del self.receivers[measurement_id]
-        self.lock.release()
+        try:
+            self.receivers_self_ports.remove(self.receivers[measurement_id].self_port)
+            del self.receivers[measurement_id]
+        finally:
+            self.lock.release()
 
     def get_worker_for_packet(self, packet):
         for key, value in self.senders.iteritems():
