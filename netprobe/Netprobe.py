@@ -19,8 +19,8 @@ print self_ip
 
 app = Flask(__name__)
 
-# mongo_client = MongoClient(host=self_ip, port=50000)
-mongo_client = MongoClient()
+mongo_client = MongoClient(host=self_ip, port=50000)
+# mongo_client = MongoClient()
 udp_sender_dao = MongoDao(mongo_client, 'Netprobe', 'UdpSender')
 udp_responder_dao = MongoDao(mongo_client, 'Netprobe', 'UdpResponder')
 udp_receiver_dao = MongoDao(mongo_client, 'Netprobe', 'UdpReceiver')

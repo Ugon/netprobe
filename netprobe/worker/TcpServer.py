@@ -23,7 +23,6 @@ class TcpServer(AbstractWorker):
 
         self.lock = Lock()
         self.ack = None
-        self.measurement_packet = None
 
     def loop_iteration(self):
         ready = select.select([self.socket], [], [], 1)
@@ -32,20 +31,23 @@ class TcpServer(AbstractWorker):
             data = client_socket.recv(64 * 1024)
             client_socket.shutdown(socket.SHUT_WR)
             client_socket.close()
-            self.measurement_packet = MeasurementPacket.from_binary(data)
-            self._do_persist_if_available()
+            measurement_packet = MeasurementPacket.from_binary(data)
+            done = False
+            while not done:
+                self.lock.acquire()
+                try:
+                    if self.ack is not None:
+                        self.dao.insert(measurement_packet.measurement_id, measurement_packet.sample_id, int(self.ack.time * 1000))
+                        print "SERVER:    ", self.ack[TCP].seq, measurement_packet.sample_id, int(self.ack.time * 1000)
+                        sys.stdout.flush()
+                        done = True
+                finally:
+                    self.lock.release()
 
     def persist_packet(self, packet):
         if packet[TCP].flags == 16:
-            self.ack = packet
-            self._do_persist_if_available()
-
-    def _do_persist_if_available(self):
-        self.lock.acquire()
-        if self.ack is not None and self.measurement_packet is not None:
-            self.dao.insert(self.measurement_packet.measurement_id, self.measurement_packet.sample_id, int(self.ack.time * 1000))
-            print "SERVER:    ", self.ack[TCP].seq, self.measurement_packet.sample_id, int(self.ack.time * 1000)
-            sys.stdout.flush()
-            self.ack = None
-            self.measurement_packet = None
-        self.lock.release()
+            self.lock.acquire()
+            try:
+                self.ack = packet
+            finally:
+                self.lock.release()
