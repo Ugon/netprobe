@@ -1,4 +1,5 @@
 from scapy.all import *
+from threading import Lock
 from uuid import *
 
 from packet.MeasurementPacket import MeasurementPacket
@@ -19,6 +20,7 @@ class TcpClient(AbstractWorker):
         self.target_port = target_port
         self.message_interval = message_interval
 
+        self.lock = Lock()
         self.syn = None
 
     def loop_iteration(self):
@@ -50,6 +52,3 @@ class TcpClient(AbstractWorker):
                 self.syn = packet
             finally:
                 self.lock.release()
-            # self.dao.insert(self.measurement_id, self.measurement_packet.sample_id, int(packet.time * 1000))
-            # print "CLIENT:    ", packet[TCP].seq + 1, self.measurement_packet.sample_id, int(packet.time * 1000)
-            # sys.stdout.flush()
