@@ -276,7 +276,7 @@ def cleanup():
         mongo_client['Netprobe']['IcmpSender'].drop()
         mongo_client['Netprobe']['IcmpResponder'].drop()
         mongo_client['Netprobe']['IcmpReceiver'].drop()
-        return "DONE", 200
+        return "CLEAN", 200
     except:
         return traceback.format_exc(), 400
 
