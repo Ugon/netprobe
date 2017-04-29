@@ -43,8 +43,8 @@ class TcpServer(AbstractWorker):
     def _do_persist_if_available(self):
         self.lock.acquire()
         if self.ack is not None and self.measurement_packet is not None:
-            self.dao.insert(self.measurement_packet.measurement_id, self.ack[TCP].seq, int(self.ack.time * 1000))
-            print "SERVER:    ", self.ack[TCP].seq, int(self.ack.time * 1000)
+            self.dao.insert(self.measurement_packet.measurement_id, self.measurement_packet.sample_id, int(self.ack.time * 1000))
+            print "SERVER:    ", self.ack[TCP].seq, self.measurement_packet.sample_id, int(self.ack.time * 1000)
             sys.stdout.flush()
             self.ack = None
             self.measurement_packet = None

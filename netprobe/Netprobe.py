@@ -19,8 +19,8 @@ print self_ip
 
 app = Flask(__name__)
 
-mongo_client = MongoClient(host=self_ip, port=50000)
-# mongo_client = MongoClient()
+# mongo_client = MongoClient(host=self_ip, port=50000)
+mongo_client = MongoClient()
 udp_sender_dao = MongoDao(mongo_client, 'Netprobe', 'UdpSender')
 udp_responder_dao = MongoDao(mongo_client, 'Netprobe', 'UdpResponder')
 udp_receiver_dao = MongoDao(mongo_client, 'Netprobe', 'UdpReceiver')
@@ -29,7 +29,6 @@ tcp_client_dao = MongoDao(mongo_client, 'Netprobe', 'TcpClient')
 icmp_sender_dao = MongoDao(mongo_client, 'Netprobe', 'IcmpSender')
 icmp_responder_dao = MongoDao(mongo_client, 'Netprobe', 'IcmpResponder')
 icmp_receiver_dao = MongoDao(mongo_client, 'Netprobe', 'IcmpReceiver')
-icmp_responder_dao = MongoDao(mongo_client, 'Netprobe', 'IcmpResponder')
 
 sniffing_registry = SniffingRegistry()
 service = MeasurementService(self_ip, sniffing_registry, udp_sender_dao, udp_responder_dao, udp_receiver_dao,
@@ -260,6 +259,24 @@ def get_icmp_receiver_results(measurement_short_id):
         measurement_id = int(measurement_short_id)
         result = icmp_receiver_dao.get_all_icmp(measurement_id)
         return json.dumps(result), 200
+    except:
+        return traceback.format_exc(), 400
+
+#########################################################################################
+
+@app.route('/cleanup', methods=['POST'])
+def cleanup():
+    try:
+        service.stop_all()
+        mongo_client['Netprobe']['UdpSender'].drop()
+        mongo_client['Netprobe']['UdpResponder'].drop()
+        mongo_client['Netprobe']['UdpReceiver'].drop()
+        mongo_client['Netprobe']['TcpServer'].drop()
+        mongo_client['Netprobe']['TcpClient'].drop()
+        mongo_client['Netprobe']['IcmpSender'].drop()
+        mongo_client['Netprobe']['IcmpResponder'].drop()
+        mongo_client['Netprobe']['IcmpReceiver'].drop()
+        return "DONE", 200
     except:
         return traceback.format_exc(), 400
 

@@ -108,3 +108,14 @@ class MeasurementService(object):
             return True
         else:
             return False
+
+    def stop_all(self):
+        for k, v in self.sniffing_registry.senders:
+            v.stop()
+            self.sniffing_registry.remove_sender(k)
+        for k, v in self.sniffing_registry.responders:
+            v.stop()
+            self.sniffing_registry.remove_sender(k)
+        for k, v in self.sniffing_registry.receivers:
+            v.stop()
+            self.sniffing_registry.remove_sender(k)
