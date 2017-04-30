@@ -185,3 +185,38 @@ Example response:
 ```
 DELETE <source_ip>:5000/measurement/icmp/sender/<measurement_short_id>
 ```
+
+## NTP
+W celu dokładnego pomiaru opóżnień w jednym kierunku należy przed uruchomieniem kontenera zsynchronizować zegary hostów.
+1) Na wszystkich hostach zainstalować NTP
+```
+sudo apt-get install ntp
+```
+
+2) Wybrać jednego hosta na serwer NTP. Zmodyfikować na nim plik `/etc/ntp.conf` usuwając wszystkie domyślne serwery (linie rozpoczynające się od `server` lub `pool`) oraz dodając:
+```
+server 127.127.1.0
+fudge 127.127.1.0 stratum 10
+restrict <NETWORK_ADDRESS> mask <NETWORK_MASK> nomodify notrap
+```
+Uruchomić:
+```
+sudo /etc/init.d/ntp restart
+```
+
+3) Na pozostałych hostach zmodyfikowa plik `/etc/ntp.conf` usuwając domyślne serwery oraz dodając:
+```
+server <NTP_SERVER_ADDRESS> iburst
+```
+Uruchomić:
+```
+sudo /etc/init.d/ntp stop
+sudo ntpd -q
+sudo /etc/init.d/ntp start
+```
+W celu monitorowania zegara można użyć komend:
+```
+ntpq -c lpeer
+echo $(($(date +%s%N)/1000000))
+```
+Synchronizacja zegarów może trwać wiele minut. Może również nie prowadzić do osiągnięcia poziomu synchronizacji wystarczającego do uzyskania satysfakcjonujących wyników jednostrnnych pomiarów parametrów łącza.
