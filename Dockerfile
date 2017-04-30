@@ -7,7 +7,6 @@ RUN apt-get update -y && apt-get install -y python-pip mongodb-org net-tools
 RUN pip install --upgrade pip
 RUN pip install scapy==2.2.0-dev netifaces flask pymongo bitstring
 
-#RUN ls -a
 RUN mkdir -p /data/db
 COPY netprobe /opt/netprobe
 

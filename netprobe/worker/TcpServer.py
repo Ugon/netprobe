@@ -37,8 +37,8 @@ class TcpServer(AbstractWorker):
                 self.lock.acquire()
                 try:
                     if self.ack is not None:
-                        self.dao.insert(measurement_packet.measurement_id, measurement_packet.sample_id, int(self.ack.time * 1000))
-                        print "SERVER:    ", self.ack[TCP].seq, measurement_packet.sample_id, int(self.ack.time * 1000)
+                        self.dao.insert(measurement_packet.measurement_id, self.ack[TCP].seq, int(self.ack.time * 1000))
+                        print "SERVER:    ", self.ack[TCP].seq, int(self.ack.time * 1000)
                         sys.stdout.flush()
                         done = True
                 finally:
